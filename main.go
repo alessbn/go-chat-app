@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"log"
 	"net/http"
 	"path/filepath"
@@ -21,10 +22,17 @@ func (t *templateHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	t.once.Do(func() {
 		t.templ = template.Must(template.ParseFiles(filepath.Join("templates", t.filename)))
 	})
-	t.templ.Execute(w, nil)
+	// ServeHTTP function pass the request r as the data argument to the Execute method
+	// this tells the template to render itself using data that can be extracted from http.Request
+	// which happens to include the host address that we need.
+	t.templ.Execute(w, r)
 }
 
 func main() {
+	// addr variable sets up a flag as a string that defaults to :8030
+	var  addr = flag.String("addr", ":8030", "The address of the application.")
+	// flag.Parse parses the arguments and extracts the appropiate information.
+	flag.Parse()
 	r := newRoom()
 	// http.Handle maps the path pattern "/" to the function passed as the second argument
 	// when the user hits http://localhost:8030/ the function will be executed.
@@ -33,8 +41,10 @@ func main() {
 	// get the room going as a goroutine for everybody to connect to,
 	// chatting operations occur in the background, allowing our main goroutine to run the web server.
 	go r.run()
-	// start the web server on port :8030 using the ListenAndServe method.
-	if err := http.ListenAndServe(":8030", nil); err != nil {
+	// log.Println outputs the address in the terminal.
+	log.Println("Starting web server on", *addr)
+	// start the web server on *addr (port :8030) using the ListenAndServe method.
+	if err := http.ListenAndServe(*addr, nil); err != nil {
 		log.Fatal("ListenAndServe:", err)
 	}
 }
