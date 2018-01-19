@@ -4,9 +4,12 @@ import (
 	"flag"
 	"log"
 	"net/http"
+	"os"
 	"path/filepath"
 	"sync"
 	"text/template"
+
+	"trace"
 )
 
 // templ represents a single template.
@@ -30,10 +33,12 @@ func (t *templateHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	// addr variable sets up a flag as a string that defaults to :8030
-	var  addr = flag.String("addr", ":8030", "The address of the application.")
+	var addr = flag.String("addr", ":8030", "The address of the application.")
 	// flag.Parse parses the arguments and extracts the appropiate information.
 	flag.Parse()
 	r := newRoom()
+	// New method creates an object that will send the output to the terminal.
+	r.tracer = trace.New(os.Stdout)
 	// http.Handle maps the path pattern "/" to the function passed as the second argument
 	// when the user hits http://localhost:8030/ the function will be executed.
 	http.Handle("/", &templateHandler{filename: "chat.html"})

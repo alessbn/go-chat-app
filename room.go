@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/gorilla/websocket"
+	"trace"
 )
 
 type room struct {
@@ -19,6 +20,9 @@ type room struct {
 	leave chan *client
 	// clients holds all current clients in this room.
 	clients map[*client]bool
+	// tracer will receive trace information of activity
+	// in the room
+	tracer trace.Tracer
 }
 
 // newRoom makes a new room.
@@ -28,6 +32,7 @@ func newRoom() *room {
 		join:    make(chan *client),
 		leave:   make(chan *client),
 		clients: make(map[*client]bool),
+		tracer:  trace.Off(),
 	}
 }
 
@@ -41,17 +46,21 @@ func (r *room) run() {
 			// if join channel receive a message
 			// r.clients map will be update to keep a reference of the client that has joined the room.
 			r.clients[client] = true
+			r.tracer.Trace("New client joined")
 		case client := <-r.leave:
 			// if leave channel receive a message
 			// will delete the client type from the map and close its send channel.
 			delete(r.clients, client)
 			close(client.send)
+			r.tracer.Trace("Client left")
 		case msg := <-r.forward:
+			r.tracer.Trace("Messages received: ", string(msg))
 			// if forward channel receive a message
 			// will iterate over all the clients and adds the message to each client's send channel
 			// then write method of client type will pick up and send it down the socket to the browser.
 			for client := range r.clients {
 				client.send <- msg
+				r.tracer.Trace(" -- sent to client")
 			}
 		}
 	}
