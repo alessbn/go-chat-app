@@ -39,9 +39,14 @@ func main() {
 	r := newRoom()
 	// New method creates an object that will send the output to the terminal.
 	r.tracer = trace.New(os.Stdout)
-	// http.Handle maps the path pattern "/" to the function passed as the second argument
+	// http.Handle maps the path pattern "/chat" to the function passed as the second argument
 	// when the user hits http://localhost:8030/ the function will be executed.
-	http.Handle("/", &templateHandler{filename: "chat.html"})
+	// MustAuth function wraps templateHanlder, this will cause the execution to run through authHandler fisrt
+	// it will run only to templateHandler if the request is authenticated.
+	http.Handle("/chat", MustAuth(&templateHandler{filename: "chat.html"}))
+	// endpoint for the login page.
+	http.Handle("/login", &templateHandler{filename: "login.html"})
+	http.HandleFunc("/auth/", loginHandler)
 	http.Handle("/room", r)
 	// get the room going as a goroutine for everybody to connect to,
 	// chatting operations occur in the background, allowing our main goroutine to run the web server.
