@@ -9,6 +9,11 @@ import (
 	"sync"
 	"text/template"
 
+	"github.com/stretchr/gomniauth"
+	"github.com/stretchr/gomniauth/providers/facebook"
+	"github.com/stretchr/gomniauth/providers/github"
+	"github.com/stretchr/gomniauth/providers/google"
+	"github.com/stretchr/objx"
 	"trace"
 )
 
@@ -25,6 +30,12 @@ func (t *templateHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	t.once.Do(func() {
 		t.templ = template.Must(template.ParseFiles(filepath.Join("templates", t.filename)))
 	})
+	data := map[string]interface{}{
+		"Host": r.Host,
+	}
+	if authCookie, err := r.Cookie("auth"); err == nil {
+		data["UserData"] = objx.MustFromBase64(authCookie.Value)
+	}
 	// ServeHTTP function pass the request r as the data argument to the Execute method
 	// this tells the template to render itself using data that can be extracted from http.Request
 	// which happens to include the host address that we need.
@@ -36,6 +47,13 @@ func main() {
 	var addr = flag.String("addr", ":8030", "The address of the application.")
 	// flag.Parse parses the arguments and extracts the appropiate information.
 	flag.Parse()
+	// setup gomniauth
+	gomniauth.SetSecurityKey("Put your auth key here.")
+	gomniauth.WithProviders(
+		facebook.New("key", "secret", "http://localhost:8030/auth/callback/facebook"),
+		github.New("key", "secret", "http://localhost:8030/auth/callback/github"),
+		google.New("key", "secret", "http://localhost:8030/auth/callback/google"),
+	)
 	r := newRoom()
 	// New method creates an object that will send the output to the terminal.
 	r.tracer = trace.New(os.Stdout)
