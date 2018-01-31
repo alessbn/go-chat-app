@@ -39,7 +39,7 @@ func (t *templateHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	// ServeHTTP function pass the request r as the data argument to the Execute method
 	// this tells the template to render itself using data that can be extracted from http.Request
 	// which happens to include the host address that we need.
-	t.templ.Execute(w, r)
+	t.templ.Execute(w, data)
 }
 
 func main() {
