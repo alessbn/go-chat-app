@@ -17,6 +17,9 @@ import (
 	"trace"
 )
 
+// set the active Avatar implementation
+var avatars Avatar = UseFileSystemAvatar
+
 // templ represents a single template.
 type templateHandler struct {
 	once     sync.Once
@@ -54,7 +57,7 @@ func main() {
 		github.New("key", "secret", "http://localhost:8030/auth/callback/github"),
 		google.New("key", "secret", "http://localhost:8030/auth/callback/google"),
 	)
-	r := newRoom(UseGravatar)
+	r := newRoom()
 	// New method creates an object that will send the output to the terminal.
 	r.tracer = trace.New(os.Stdout)
 	// http.Handle maps the path pattern "/chat" to the function passed as the second argument
@@ -76,8 +79,13 @@ func main() {
 		w.Header().Set("Location", "/chat")
 		w.WriteHeader(http.StatusTemporaryRedirect)
 	})
+	// http.StripPrefix function takes http.Handler in, modifies the path by removing the specifies prefix,
+	// passes the function onto http.FileServer handler that will serve static files, provide index listings
+	// and generate 404 error if it cannot find the file.
+	// http.Dir allows to specify which folder we want to expose publicly.
 	http.Handle("/upload", &templateHandler{filename: "upload.html"})
 	http.HandleFunc("/uploader", uploaderHandler)
+	http.Handle("/avatars/", http.StripPrefix("/avatars/", http.FileServer(http.Dir("./avatars"))))
 	// get the room going as a goroutine for everybody to connect to,
 	// chatting operations occur in the background, allowing our main goroutine to run the web server.
 	go r.run()

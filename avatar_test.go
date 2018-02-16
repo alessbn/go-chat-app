@@ -2,24 +2,30 @@ package main
 
 import (
 	"testing"
+
+	gomniauthtest "gomniauth/test"
 )
 
 func TestAuthAvatar(t *testing.T) {
 	var authAvatar AuthAvatar
-	client := new(client)
-	url, err := authAvatar.GetAvatarURL(client)
+	testUser := &gomniauthtest.testUser{}
+	testUser.On("AvatarURL").Return("", ErrNoAvatarURL)
+	testChatUser := &chatUser{User: testUser}
+	url, err := authAvatar.GetAvatarURL(testChatUser)
 	if err != ErrNoAvatarURL {
 		t.Error("AuthAvatar.GetAvatarURL should return ErrNoAvatarURL when no value present")
 	}
 	// set a value
 	testURL := "http://url-to-gravatar/"
-	client.userData = map[string]interface{}{"avatar_url": testUrl}
-	url, err = authAvatar.GetAvatarURL(client)
+	testUser = &gomniauthtest.testUser{}
+	testChatUser.User = testUser
+	testUser.On("AvatarURL").Return(testUrl, nil)
+	url, err = authAvatar.GetAvatarURL(testChatUser)
 	if err != nil {
 		t.Error("AuthAvatar.GetAvatarURL should return no error when value present")
 	}
 	if url != testURL {
-		t.Error("AuthAvatar.GetAvatarURL should return URL")
+		t.Error("AuthAvatar.GetAvatarURL should return correct URL")
 	}
 }
 
@@ -27,26 +33,38 @@ type AuthAvatar struct{}
 
 var UseAuthAvatar AuthAvatar
 
-func (AuthAvatar) GetAvatarURL(c *client) (string, error) {
-	if url, ok := c.userData["avatar_url"]; ok {
-		if urlStr, ok := url.(string); ok {
-			return urlStr, nil
-		}
+func (AuthAvatar) GetAvatarURL(u ChatUser) (string, error) {
+	url := u.AvatarURL()
+	if len(url) == 0 {
+		return "", ErrNoAvatarURL
 	}
-	return "", ErrNoAvatarURL
+	return url, nil
 }
 
 func TestGravatarAvatar(t *testing.T) {
 	var gravatarAvatar gravatarAvatar
-	client := new(client)
-	client.userData = map[string]interface{}{
-		"userid": "0bc83cb571cd1c50ba6f3e8a78ef1346",
-	}
-	url, err := gravatarAvatar.GetAvatarURL(client)
+	user := &chatUser{uniqueID: "abc"}
+	url, err := gravatarAvatar.GetAvatarURL(user)
 	if err != nil {
 		t.Error("GravatarAvatar.GetAvatarURL should nor return an error")
 	}
-	if url != "//www.gravatar.com/avatar/0bc83cb571cd1c50ba6f3e8a78ef1346" {
+	if url != "//www.gravatar.com/avatar/abc" {
 		t.Errorf("GravatarAvatar.GetAvatarURL wrongly returned %s", url)
+	}
+}
+
+func TestFileSystemAvatar(t *testing.T) {
+	// make a test avatar file
+	filename := path.Join("avatars", "abc.jog")
+	ioutil.WriteFile(filename, []byte{}, 0777)
+	defer func() { os.Remove(filename) }()
+	var fileSystemAvatar fileSystemAvatar
+	user := &chatUser{uniqueID: "abc"}
+	url, err := fileSystemAvatar.GetAvatarURL(user)
+	if err != nil {
+		t.Error("FileSystemAvatar.GetAvatarURL should not return an error")
+	}
+	if url != "/avatars/abc.jpg" {
+		t.Errorf("FileSystemAvatar.GetAvatarURL wrongly returned %s", url)
 	}
 }
