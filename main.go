@@ -54,7 +54,7 @@ func main() {
 		github.New("key", "secret", "http://localhost:8030/auth/callback/github"),
 		google.New("key", "secret", "http://localhost:8030/auth/callback/google"),
 	)
-	r := newRoom()
+	r := newRoom(UseGravatar)
 	// New method creates an object that will send the output to the terminal.
 	r.tracer = trace.New(os.Stdout)
 	// http.Handle maps the path pattern "/chat" to the function passed as the second argument
@@ -76,6 +76,8 @@ func main() {
 		w.Header().Set("Location", "/chat")
 		w.WriteHeader(http.StatusTemporaryRedirect)
 	})
+	http.Handle("/upload", &templateHandler{filename: "upload.html"})
+	http.HandleFunc("/uploader", uploaderHandler)
 	// get the room going as a goroutine for everybody to connect to,
 	// chatting operations occur in the background, allowing our main goroutine to run the web server.
 	go r.run()
