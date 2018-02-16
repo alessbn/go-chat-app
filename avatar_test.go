@@ -29,18 +29,6 @@ func TestAuthAvatar(t *testing.T) {
 	}
 }
 
-type AuthAvatar struct{}
-
-var UseAuthAvatar AuthAvatar
-
-func (AuthAvatar) GetAvatarURL(u ChatUser) (string, error) {
-	url := u.AvatarURL()
-	if len(url) == 0 {
-		return "", ErrNoAvatarURL
-	}
-	return url, nil
-}
-
 func TestGravatarAvatar(t *testing.T) {
 	var gravatarAvatar gravatarAvatar
 	user := &chatUser{uniqueID: "abc"}
