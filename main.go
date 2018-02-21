@@ -9,12 +9,12 @@ import (
 	"sync"
 	"text/template"
 
+	"github.com/alessbn/go-chat-trace"
 	"github.com/stretchr/gomniauth"
 	"github.com/stretchr/gomniauth/providers/facebook"
 	"github.com/stretchr/gomniauth/providers/github"
 	"github.com/stretchr/gomniauth/providers/google"
 	"github.com/stretchr/objx"
-	"trace"
 )
 
 // set the active Avatar implementation

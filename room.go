@@ -4,9 +4,9 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/alessbn/go-chat-trace"
 	"github.com/gorilla/websocket"
 	"github.com/stretchr/objx"
-	"trace"
 )
 
 type room struct {
