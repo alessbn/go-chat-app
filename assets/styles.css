@@ -2,6 +2,11 @@ body, html {
   height: 100%;
 }
 
+.logo {
+  color: #fff;
+  font-family: 'Pacifico', cursive;
+}
+
 .home {
   height: 100%;
   overflow: hidden;
@@ -11,14 +16,59 @@ body, html {
   justify-content: center;
 }
 
-.home__title {
-  color: #fff;
-  font-family: 'Pacifico', cursive;
-}
-
-.home__title > h1 {
+.home__title h1 {
   font-size: 70px;
   margin-top: 0;
+}
+
+.chat__header {
+  background: linear-gradient(to right, #ff7301 , #a800ff);
+  padding: 20px 25px;
+  margin-bottom: 25px;
+}
+
+.chat__header h1 {
+  margin: 0;
+}
+
+.chat__text-box {
+  position: fixed;
+  bottom: 0;
+  padding: 15px 0 25px;
+  width: 100%;
+  background-color: #f2f2f2;
+}
+
+.chat__text-box a {
+  color: #ff7301;
+  font-weight: 700;
+}
+
+.chat__text-box a {
+  color: #ff7301;
+  font-weight: 700;
+}
+
+.chat__text-box textarea {
+  resize: none;
+}
+
+.panel--sign-in {
+  font-size: 18px;
+  text-align: center;
+}
+
+.panel--sign-in > a:first-of-type {
+    margin-top: 25px;
+}
+
+.msg {
+ overflow: hidden;
+ margin-bottom: 5px;
+}
+
+.username {
+  font-weight: 700;
 }
 
 .img--cover {
@@ -28,13 +78,29 @@ body, html {
      -moz-background-size: cover;
 }
 
-.panel-body {
-  font-size: 18px;
-  text-align: center;
+.img--avatar {
+  float: left;
+  margin-right: 5px;
+  width: 50px;
+  vertical-align: middle;
 }
 
-.panel-body > a:first-of-type {
-    margin-top: 25px;
+.btn--send {
+  background-color: #ff7301;
+  color: #fff;
+  border: none;
+}
+
+.btn--send:hover {
+  background-color: #ff5401;
+  color: #fff;
+  border: none;
+}
+
+.btn-default.btn--send:active {
+  background-color: #ff5401;
+  color: #fff;
+  border: none;
 }
 
 .btn--social {
