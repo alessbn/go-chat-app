@@ -90,6 +90,7 @@ func main() {
 	http.Handle("/upload", &templateHandler{filename: "upload.html"})
 	http.HandleFunc("/uploader", uploaderHandler)
 	http.Handle("/avatars/", http.StripPrefix("/avatars/", http.FileServer(http.Dir("./avatars"))))
+	http.Handle("/assets/", http.StripPrefix("/assets/", http.FileServer(http.Dir("./assets/"))))
 	// get the room going as a goroutine for everybody to connect to,
 	// chatting operations occur in the background, allowing our main goroutine to run the web server.
 	go r.run()
